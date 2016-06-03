@@ -47,9 +47,11 @@ class imagesDialog(QDialog):
     def initUI(self):
         self.setWindowTitle(_(u'Anki – Download images'))
         self.setWindowIcon(QIcon(":/icons/anki.png"))
-
         view = Browser()
-        view.load(QUrl('http://images.google.com'))
+
+        search_term = "fruit"
+        url = "https://www.google.com/search?tbm=isch&q=" + search_term + "&oq=" + search_term
+        view.load(QUrl(url))
 
         outer_layout = QVBoxLayout()
         self.setLayout(outer_layout)
