@@ -18,7 +18,16 @@ def review_entries():
         raise RuntimeError('User cancel')
 
 def download_image_for_note():
-    review_entries()
+    try:
+        review_entries()
+    except RuntimeError as rte:
+        if 'cancel' in str(rte):
+            # User cancelled, so close silently
+            return
+        else:
+            #unhandled
+            raise
+
 
 class Browser(QWebView):
 
@@ -40,7 +49,7 @@ class imagesDialog(QDialog):
         self.setWindowIcon(QIcon(":/icons/anki.png"))
 
         view = Browser()
-        view.load(QUrl('http://www.google.com'))
+        view.load(QUrl('http://images.google.com'))
 
         outer_layout = QVBoxLayout()
         self.setLayout(outer_layout)
@@ -69,28 +78,6 @@ class imagesDialog(QDialog):
         #     list.addItem(item)
         # outer_layout.addWidget(list)
 
-
-def bing_search(query, search_type):
-    #search_type: Web, Image, News, Video
-    key= 'pKeY477b24auIf1Cms84RpwkAnzHyT2EWOfuzmQNQdg'
-    query = urllib.quote(query)
-    # create credential for authentication
-    user_agent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; FDM; .NET CLR 2.0.50727; InfoPath.2; .NET CLR 1.1.4322)'
-    credentials = (':%s' % key).encode('base64')[:-1]
-    auth = 'Basic %s' % credentials
-    url = 'https://api.datamarket.azure.com/Data.ashx/Bing/Search/'+search_type+'?Query=%27'+query+'%27&$top=5&$format=json'
-    request = urllib2.Request(url)
-    request.add_header('Authorization', auth)
-    request.add_header('User-Agent', user_agent)
-    request_opener = urllib2.build_opener()
-    response = request_opener.open(request)
-    response_data = response.read()
-    json_result = json.loads(response_data)
-    result_list = json_result['d']['results']
-    print result_list
-    return result_list
-
-
 try:
     mw.edit_media_submenu.addSeparator()
 except AttributeError:
@@ -101,8 +88,8 @@ except AttributeError:
 # create a new menu item
 mw.images_search_action = QAction(mw)
 mw.images_search_action.setText(u"Note image")
-mw.note_download_action.setToolTip(
-    "Download images for all image fields on this note.")
+# mw.note_download_action.setToolTip(
+#     "Download images for all image fields on this note.")
 
 # set it to call testFunction when it's clicked
 mw.connect(mw.images_search_action, SIGNAL("triggered()"), download_image_for_note)
