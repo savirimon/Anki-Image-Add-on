@@ -7,6 +7,7 @@ import json
 from aqt import mw
 # import the "show info" tool from utils.py
 from aqt.utils import showInfo
+from anki.utils import stripHTML
 # import all of the Qt GUI library
 from aqt.qt import *
 
@@ -64,9 +65,13 @@ class imagesDialog(QDialog):
     def initUI(self):
         self.setWindowTitle(_(u'Anki – Download images'))
         self.setWindowIcon(QIcon(":/icons/anki.png"))
-        view = Browser()
+        card = mw.col.sched.getCard()
 
-        search_term = "strawberry"#self.word
+        view = Browser()
+        search_term = stripHTML(card.q())
+        search_term = search_term.replace(u'<br>', u' ')
+        search_term = search_term.replace(u'<br />', u' ')
+        #search_term = Editor.currentField #self.word
         url = "https://www.google.com/search?tbm=isch&q=" + search_term + "&oq=" + search_term
         view.load(QUrl(url))
 
