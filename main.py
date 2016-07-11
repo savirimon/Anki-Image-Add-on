@@ -101,8 +101,9 @@ class imagesDialog(QDialog):
 
     def gainFocus(note, field):
         global search_term
-        #TODO: ALLOW USER TO CHOOSE WHICH fIELD ENTRY TO CHOOSE.Front by default.
-        search_term = note.fields[0]
+        # Sets the search term to the field you're on
+        # Note: does not work with newly added fields until restart
+        search_term = note.fields[field]
 
     Editor.setupButtons = wrap(Editor.setupButtons, setupButtons)
     addHook("editFocusGained", gainFocus)
