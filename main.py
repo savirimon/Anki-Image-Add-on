@@ -4,17 +4,20 @@ import urllib2
 import json
 
 # import the main window object (mw) from ankiqt
-from aqt import mw
+from aqt import mw, browser, editor
 # import the "show info" tool from utils.py
 from aqt.utils import showInfo
 from anki.utils import stripHTML
 # import all of the Qt GUI library
 from aqt.qt import *
-
-#more imports
-from anki.hooks import addHook
 from aqt.editor import Editor
 
+#more imports
+from anki.hooks import addHook, runHook, wrap
+from anki.consts import MODEL_STD
+
+#global vars
+search_term = "boop"
 
 def review_entries():
     review_images = imagesDialog()
@@ -43,34 +46,24 @@ class Browser(QWebView):
         frame = self.page().mainFrame()
         print unicode(frame.toHtml()).encode('utf-8')
 
-# FieldData class for English data modeled from download_audio plugin
-class FieldData(object):
-
-    #constructor
-    def __init__(self, w_field, word):
-        self.word_field_name = w_field
-        # Take word from aqt/browser.py
-        self.word = word.replace(u'<br>', u' ')
-        self.word = self.word.replace(u'<br />', u' ')
-
-    @property
-    def empty(self):
-        return not self.word
-
 class imagesDialog(QDialog):
     def __init__(self):
         super(imagesDialog, self).__init__()
         self.initUI()
 
     def initUI(self):
+        global search_term
+        search_term = str(search_term)
+        # runHook("editFocusGained", self.note, field)
         self.setWindowTitle(_(u'Anki – Download images'))
         self.setWindowIcon(QIcon(":/icons/anki.png"))
-        card = mw.col.sched.getCard()
+        # mw.editor.saveNow()
 
         view = Browser()
-        search_term = stripHTML(card.q())
+        # search_term = stripHTML(search_term)
         search_term = search_term.replace(u'<br>', u' ')
         search_term = search_term.replace(u'<br />', u' ')
+        # search_term = search_term.replace([u'])
         #search_term = Editor.currentField #self.word
         url = "https://www.google.com/search?tbm=isch&q=" + search_term + "&oq=" + search_term
         view.load(QUrl(url))
@@ -102,9 +95,14 @@ class imagesDialog(QDialog):
         #     list.addItem(item)
         # outer_layout.addWidget(list)
 
-
     def setupButtons(self):
-        open_button = self._addButton("image_dialog", lambda self=self: review_entries(),
+        open_button = self._addButton("imagesDialog", lambda self=self: review_entries(),
                     text=u"img\u0336", tip="ImageDialog (Ctrl+i)", key="Ctrl+i")
 
-    addHook("setupEditorButtons", setupButtons)
+    def gainFocus(note, field):
+        global search_term
+        #TODO: ALLOW USER TO CHOOSE WHICH fIELD ENTRY TO CHOOSE.Front by default.
+        search_term = note.fields[0]
+
+    Editor.setupButtons = wrap(Editor.setupButtons, setupButtons)
+    addHook("editFocusGained", gainFocus)
