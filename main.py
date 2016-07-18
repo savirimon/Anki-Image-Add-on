@@ -19,20 +19,30 @@ from anki.consts import MODEL_STD
 #global vars
 search_term = "boop"
 
+# class CanvasDialog(QDialog):
+#     def __init__(self):
+#         super(CanvasDialog, self).__init__()
+#         self.initUI()
+
+#     def initUI(self):
+#         canvasView = Canvas()
+
+#         outer_layout = QVBoxLayout()
+#         self.setLayout(outer_layout)
+
+#         outer_layout.addWidget(canvasView)
+
 #Canvas class for drawing new study images
-class Canvas(QWidget):
+class Canvas(QDialog):
     def __init__(self):
         super(Canvas, self).__init__()
         self.initUI()
+        self.penWidth = 3
         self.prevPoint = QPoint()
         self.drawing = False
         self.color = Qt.black
 
     def initUI(self):
-        self.text = u'\u041b\u0435\u0432 \u041d\u0438\u043a\u043e\u043b\u0430\
-            \u0435\u0432\u0438\u0447 \u0422\u043e\u043b\u0441\u0442\u043e\u0439: \n\
-            \u0410\u043d\u043d\u0430 \u041a\u0430\u0440\u0435\u043d\u0438\u043d\u0430'
-
         self.setGeometry(300, 300, 280, 170)
         self.setWindowTitle('Draw Reference Image')
         self.show()
@@ -40,24 +50,21 @@ class Canvas(QWidget):
     def paintEvent(self, event):
         painter = QPainter();
         painter.begin(self)
-        self.drawText(event, painter)
+        self.drawLine(self.prevPoint)
         painter.end()
-
-    def drawText(self, event, painter):
-        painter.setPen()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.lastPoint = event.pos()
+            self.prevPoint = event.pos()
             self.drawing = True
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton and self.drawing:
-            self.drawLineTo(event.pos())
-            self.drawing = false
+            self.drawLine(self.prevPoint)
+            self.drawing = False
 
     def drawLine(self, currPoint):
-        painter = QPainter(self.image)
+        painter = QPainter(self)
         painter.setPen(QPen(self.color, self.penWidth, Qt.SolidLine, Qt.RoundCap,
             Qt.RoundJoin))
         painter.drawLine(self.prevPoint, currPoint)
@@ -66,7 +73,7 @@ class Canvas(QWidget):
 
 def initialize_canvas():
     paintTool = Canvas()
-    paintTool.show()
+    paintTool.exec_()
 
 def review_entries():
     review_images = imagesDialog()
