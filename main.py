@@ -19,6 +19,55 @@ from anki.consts import MODEL_STD
 #global vars
 search_term = "boop"
 
+#Canvas class for drawing new study images
+class Canvas(QWidget):
+    def __init__(self):
+        super(Canvas, self).__init__()
+        self.initUI()
+        self.prevPoint = QPoint()
+        self.drawing = False
+        self.color = Qt.black
+
+    def initUI(self):
+        self.text = u'\u041b\u0435\u0432 \u041d\u0438\u043a\u043e\u043b\u0430\
+            \u0435\u0432\u0438\u0447 \u0422\u043e\u043b\u0441\u0442\u043e\u0439: \n\
+            \u0410\u043d\u043d\u0430 \u041a\u0430\u0440\u0435\u043d\u0438\u043d\u0430'
+
+        self.setGeometry(300, 300, 280, 170)
+        self.setWindowTitle('Draw Reference Image')
+        self.show()
+
+    def paintEvent(self, event):
+        painter = QPainter();
+        painter.begin(self)
+        self.drawText(event, painter)
+        painter.end()
+
+    def drawText(self, event, painter):
+        painter.setPen()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.lastPoint = event.pos()
+            self.drawing = True
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton and self.drawing:
+            self.drawLineTo(event.pos())
+            self.drawing = false
+
+    def drawLine(self, currPoint):
+        painter = QPainter(self.image)
+        painter.setPen(QPen(self.color, self.penWidth, Qt.SolidLine, Qt.RoundCap,
+            Qt.RoundJoin))
+        painter.drawLine(self.prevPoint, currPoint)
+        self.update()
+        self.prevPoint = QPoint(currPoint)     
+
+def initialize_canvas():
+    paintTool = Canvas()
+    paintTool.show()
+
 def review_entries():
     review_images = imagesDialog()
     if not review_images.exec_():
@@ -95,9 +144,13 @@ class imagesDialog(QDialog):
         #     list.addItem(item)
         # outer_layout.addWidget(list)
 
-    def setupButtons(self):
+    def setupSearchBrowserButton(self):
         open_button = self._addButton("imagesDialog", lambda self=self: review_entries(),
                     text=u"img\u0336", tip="ImageDialog (Ctrl+i)", key="Ctrl+i")
+
+    def setupDrawingCanvasButton(self):
+        canvas_button = self._addButton("Canvas", lambda self=self: initialize_canvas(),
+                text=u"d\u0336", tip="Canvas (Ctrl+d)", key="Ctrl+d")
 
     def gainFocus(note, field):
         global search_term
@@ -105,5 +158,6 @@ class imagesDialog(QDialog):
         # Note: does not work with newly added fields until restart
         search_term = note.fields[field]
 
-    Editor.setupButtons = wrap(Editor.setupButtons, setupButtons)
+    Editor.setupButtons = wrap(Editor.setupButtons, setupSearchBrowserButton)
+    Editor.setupButtons = wrap(Editor.setupButtons, setupDrawingCanvasButton)   
     addHook("editFocusGained", gainFocus)
