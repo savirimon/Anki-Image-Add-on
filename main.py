@@ -71,7 +71,8 @@ def initialize_canvas():
 def review_entries():
     review_images = imagesDialog()
     if not review_images.exec_():
-        raise RuntimeError('User cancel')
+        return
+        #raise RuntimeError('User cancel')
 
 def download_image_for_note():
     try:
