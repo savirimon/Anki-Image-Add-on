@@ -16,21 +16,12 @@ from aqt.editor import Editor
 from anki.hooks import addHook, runHook, wrap
 from anki.consts import MODEL_STD
 
+#Debugging
+import code
+# code.interact(local=locals())
+
 #global vars
 search_term = "boop"
-
-# class CanvasDialog(QDialog):
-#     def __init__(self):
-#         super(CanvasDialog, self).__init__()
-#         self.initUI()
-
-#     def initUI(self):
-#         canvasView = Canvas()
-
-#         outer_layout = QVBoxLayout()
-#         self.setLayout(outer_layout)
-
-#         outer_layout.addWidget(canvasView)
 
 #Canvas class for drawing new study images
 class Canvas(QDialog):
@@ -47,29 +38,37 @@ class Canvas(QDialog):
         self.setWindowTitle('Draw Reference Image')
         self.show()
 
-    def paintEvent(self, event):
+    def paintEvent(self, event = None):
+        print("Paint Event")
         painter = QPainter();
         painter.begin(self)
-        self.drawLine(self.prevPoint)
+        painter.setPen(QPen(self.color, self.penWidth, Qt.SolidLine, Qt.RoundCap,
+            Qt.RoundJoin))
+        painter.drawPoint(self.prevPoint)
         painter.end()
 
     def mousePressEvent(self, event):
+        print("Pressed")
         if event.button() == Qt.LeftButton:
             self.prevPoint = event.pos()
             self.drawing = True
+            self.update()
 
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton and self.drawing:
-            self.drawLine(self.prevPoint)
-            self.drawing = False
+    # def mouseReleaseEvent(self, event):
+    #     print("Released")
+    #     if event.button() == Qt.LeftButton and self.drawing:
+    #         self.drawLine(self.prevPoint)
+    #         self.drawing = False
 
-    def drawLine(self, currPoint):
-        painter = QPainter(self)
-        painter.setPen(QPen(self.color, self.penWidth, Qt.SolidLine, Qt.RoundCap,
-            Qt.RoundJoin))
-        painter.drawLine(self.prevPoint, currPoint)
-        self.update()
-        self.prevPoint = QPoint(currPoint)     
+    # def drawLine(self, currPoint):
+    #     painter = QPainter(self)
+    #     painter.begin(self)
+    #     painter.setPen(QPen(self.color, self.penWidth, Qt.SolidLine, Qt.RoundCap,
+    #         Qt.RoundJoin))
+    #     painter.drawLine(self.prevPoint, currPoint)
+    #     painter.end()
+    #     self.update()
+    #     self.prevPoint = QPoint(currPoint)
 
 def initialize_canvas():
     paintTool = Canvas()
@@ -167,5 +166,5 @@ class imagesDialog(QDialog):
         search_term = note.fields[field]
 
     Editor.setupButtons = wrap(Editor.setupButtons, setupSearchBrowserButton)
-    Editor.setupButtons = wrap(Editor.setupButtons, setupDrawingCanvasButton)   
+    Editor.setupButtons = wrap(Editor.setupButtons, setupDrawingCanvasButton)
     addHook("editFocusGained", gainFocus)
