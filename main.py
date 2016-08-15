@@ -17,7 +17,7 @@ from anki.hooks import addHook, runHook, wrap
 from anki.consts import MODEL_STD
 
 #Debugging
-import code
+#import code
 # code.interact(local=locals())
 
 #global vars
