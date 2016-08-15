@@ -21,6 +21,7 @@ from anki.consts import MODEL_STD
 # code.interact(local=locals())
 
 #global vars
+global search_term
 search_term = "boop"
 
 #Canvas class for drawing new study images
@@ -38,6 +39,11 @@ class Canvas(QDialog):
         self.setGeometry(300, 300, 280, 170)
         self.setWindowTitle('Draw Reference Image')
         self.show()
+
+    def saveImage(self):
+        pixels = QPixmap.grabWidget(self)
+        fileName = 'test1.jpg'
+        pixels.save(fileName, 'jpg')
 
     def paintEvent(self, event = None):
         print("Paint Event")
@@ -64,6 +70,9 @@ class Canvas(QDialog):
         if self.drawing:
             self.points.append(event.pos())
             self.update()
+
+    def keyPressEvent(self, event):
+        self.saveImage()
 
 
     # def mouseReleaseEvent(self, event):
@@ -120,7 +129,6 @@ class imagesDialog(QDialog):
         self.initUI()
 
     def initUI(self):
-        global search_term
         search_term = str(search_term)
         # runHook("editFocusGained", self.note, field)
         self.setWindowTitle(_(u'Anki – Download images'))
