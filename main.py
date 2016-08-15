@@ -25,13 +25,14 @@ search_term = "boop"
 
 #Canvas class for drawing new study images
 class Canvas(QDialog):
+
     def __init__(self):
         super(Canvas, self).__init__()
         self.initUI()
         self.penWidth = 3
-        self.prevPoint = QPoint()
         self.drawing = False
         self.color = Qt.black
+        self.points = []
 
     def initUI(self):
         self.setGeometry(300, 300, 280, 170)
@@ -44,15 +45,26 @@ class Canvas(QDialog):
         painter.begin(self)
         painter.setPen(QPen(self.color, self.penWidth, Qt.SolidLine, Qt.RoundCap,
             Qt.RoundJoin))
-        painter.drawPoint(self.prevPoint)
+        for pt in self.points:
+            painter.drawPoint(pt)
         painter.end()
 
     def mousePressEvent(self, event):
         print("Pressed")
         if event.button() == Qt.LeftButton:
-            self.prevPoint = event.pos()
             self.drawing = True
+            self.points.append(event.pos())
             self.update()
+
+    def mouseReleaseEvent(self, event):
+        self.drawing = False
+        self.update()
+
+    def mouseMoveEvent(self, event):
+        if self.drawing:
+            self.points.append(event.pos())
+            self.update()
+
 
     # def mouseReleaseEvent(self, event):
     #     print("Released")
