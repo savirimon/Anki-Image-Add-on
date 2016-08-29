@@ -36,6 +36,10 @@ class Canvas(QDialog):
         self.drawing = False
         self.color = Qt.black
         self.points = []
+        self.preview = []
+        self.start = None
+        self.end = None
+        self.drawMode = "point"
 
     def initUI(self):
         self.setGeometry(300, 300, 280, 170)
@@ -66,22 +70,27 @@ class Canvas(QDialog):
             Qt.RoundJoin))
         for pt in self.points:
             painter.drawPoint(pt)
+        for pt in self.preview:
+            painter.drawPoint(pt)
         painter.end()
 
     def mousePressEvent(self, event):
         print("Pressed")
         if event.button() == Qt.LeftButton:
             self.drawing = True
-            self.points.append(event.pos())
+            self.start = event.pos()
             self.update()
 
     def mouseReleaseEvent(self, event):
+        self.points.append(event.pos())
         self.drawing = False
         self.update()
 
     def mouseMoveEvent(self, event):
         if self.drawing:
-            self.points.append(event.pos())
+            self.end = event.pos()
+            if(self.drawMode == "point"):
+                self.preview = [event.pos()]
             self.update()
 
 
