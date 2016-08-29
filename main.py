@@ -3,6 +3,8 @@ import urllib
 import urllib2
 import json
 
+import aqt.editor
+
 # import the main window object (mw) from ankiqt
 from aqt import mw, browser, editor
 # import the "show info" tool from utils.py
@@ -40,10 +42,21 @@ class Canvas(QDialog):
         self.setWindowTitle('Draw Reference Image')
         self.show()
 
+    #TODO: MAKE IT SO IT DISPLAYS CORRECT IMAGE WHEN THERE'S AN EXISTING IMAGE
     def saveImage(self):
+        # save image to media folder 
         pixels = QPixmap.grabWidget(self)
         fileName = 'test1.jpg'
         pixels.save(fileName, 'jpg')
+        # send to card in first empty field
+        data = data = u'<img src="%s">' % fileName
+
+        for(name, value) in currentNote.items():
+            if name == 'Back':
+                currentNote[name] = value + data
+        currentNote.flush()
+        mw.noteChanged(currentNote.id)
+        mw.reset()
 
     def paintEvent(self, event = None):
         print("Paint Event")
@@ -71,8 +84,11 @@ class Canvas(QDialog):
             self.points.append(event.pos())
             self.update()
 
+
     def keyPressEvent(self, event):
         self.saveImage()
+        self.done(1)
+
 
 
     # def mouseReleaseEvent(self, event):
@@ -94,6 +110,7 @@ class Canvas(QDialog):
 def initialize_canvas():
     paintTool = Canvas()
     paintTool.exec_()
+    #update GUI here
 
 def review_entries():
     review_images = imagesDialog()
@@ -149,6 +166,10 @@ class imagesDialog(QDialog):
 
         outer_layout.addWidget(view)
 
+    # def dragEnterEvent(self, event):
+        # if(event.mimeData().hasImage()):
+
+
         # query = "sunshine"
         # search_results = bing_search(query, 'Image')
 
@@ -181,9 +202,34 @@ class imagesDialog(QDialog):
 
     def gainFocus(note, field):
         global search_term
+        global currentNote
+        global mediaField
         # Sets the search term to the field you're on
         # Note: does not work with newly added fields until restart
         search_term = note.fields[field]
+        currentNote = note
+        mediaField = field
+
+    # def mousePressEvent(self, event):
+    # print("Pressed")
+    # if event.button() == Qt.LeftButton and event.:
+
+
+    def mouseReleaseEvent(self, event):
+        self.drawing = False
+        self.update()
+
+    def mouseMoveEvent(self, event):
+        if self.drawing:
+            self.points.append(event.pos())
+            self.update()
+
+    def keyPressEvent(self, event):
+        self.saveImage()
+    
+
+
+
 
     Editor.setupButtons = wrap(Editor.setupButtons, setupSearchBrowserButton)
     Editor.setupButtons = wrap(Editor.setupButtons, setupDrawingCanvasButton)
