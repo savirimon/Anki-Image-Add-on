@@ -79,6 +79,8 @@ class Canvas(QDialog):
             if self.start != None and self.end != None:
                 if self.drawMode == "line":
                     painter.drawLine(self.start.x(), self.start.y(), self.end.x(), self.end.y())
+                elif self.drawMode == "rect":
+                    painter.drawRect(self.start.x(), self.start.y(), self.end.x() - self.start.x(), self.end.y() - self.start.y())
 
         painter.drawPath(self.path)
         # for pt in self.preview:
@@ -97,21 +99,19 @@ class Canvas(QDialog):
     def mouseReleaseEvent(self, event):
         if self.drawMode == "point":
             self.path.addEllipse(event.pos().x(), event.pos().y(), 1, 1)
-        elif self.drawMode == "line":
-            self.path.lineTo(self.end.x(), self.end.y())
-        # self.drawing = False
-        self.update()
+        
+        if self.start != None and self.end != None:
+            if self.drawMode == "line":
+                self.path.lineTo(self.end.x(), self.end.y())
+            elif self.drawMode == "rect":
+                self.path.addRect(self.start.x(), self.start.y(), 
+                    self.end.x() - self.start.x(), 
+                    self.end.y() - self.start.y())
+            self.update()
 
     def mouseMoveEvent(self, event):
         if self.drawing:
-            self.preview = []
             self.end = event.pos()
-            if(self.drawMode == "point"):
-                self.preview.append(event.pos())
-            elif self.drawMode == "rect":
-                for x in range(self.start.x(), self.end.x()):
-                    for y in range(self.start.y(), self.end.y()):
-                        self.preview.append(QPoint(x,y))
             self.update()
 
 
