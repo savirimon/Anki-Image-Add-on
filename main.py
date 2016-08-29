@@ -132,6 +132,11 @@ class Canvas(QDialog):
             self.drawMode = "rect"
         elif event.key() == Qt.Key_E:
             self.drawMode = "ellipse"
+        elif event.key() == Qt.Key_1:
+            self.color = Qt.black;
+        elif event.key() == Qt.Key_2:
+            self.color = Qt.red;
+
 
 def initialize_canvas():
     paintTool = Canvas()
