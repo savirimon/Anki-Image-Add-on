@@ -36,10 +36,14 @@ class Canvas(QDialog):
         self.drawing = False
         self.color = Qt.black
         self.points = []
+        self.lines = []
+        self.rects = []
+        self.circles = []
         self.preview = []
         self.start = None
         self.end = None
         self.drawMode = "point"
+        self.path = QPainterPath()
 
     def initUI(self):
         self.setGeometry(300, 300, 280, 170)
@@ -68,10 +72,18 @@ class Canvas(QDialog):
         painter.begin(self)
         painter.setPen(QPen(self.color, self.penWidth, Qt.SolidLine, Qt.RoundCap,
             Qt.RoundJoin))
-        for pt in self.points:
-            painter.drawPoint(pt)
-        for pt in self.preview:
-            painter.drawPoint(pt)
+
+        if self.drawMode == "point" and self.end != None:
+            painter.drawEllipse(self.end.x(), self.end.y(), 1, 1)
+        else:
+            if self.start != None and self.end != None:
+                if self.drawMode == "line":
+                    painter.drawLine(self.start.x(), self.start.y(), self.end.x(), self.end.y())
+
+        painter.drawPath(self.path)
+        # for pt in self.preview:
+        #     painter.drawPoint(pt)
+
         painter.end()
 
     def mousePressEvent(self, event):
@@ -79,24 +91,40 @@ class Canvas(QDialog):
         if event.button() == Qt.LeftButton:
             self.drawing = True
             self.start = event.pos()
+            self.path.moveTo(self.start)
             self.update()
 
     def mouseReleaseEvent(self, event):
-        self.points.append(event.pos())
-        self.drawing = False
+        if self.drawMode == "point":
+            self.path.addEllipse(event.pos().x(), event.pos().y(), 1, 1)
+        elif self.drawMode == "line":
+            self.path.lineTo(self.end.x(), self.end.y())
+        # self.drawing = False
         self.update()
 
     def mouseMoveEvent(self, event):
         if self.drawing:
+            self.preview = []
             self.end = event.pos()
             if(self.drawMode == "point"):
-                self.preview = [event.pos()]
+                self.preview.append(event.pos())
+            elif self.drawMode == "rect":
+                for x in range(self.start.x(), self.end.x()):
+                    for y in range(self.start.y(), self.end.y()):
+                        self.preview.append(QPoint(x,y))
             self.update()
 
 
     def keyPressEvent(self, event):
-        self.saveImage()
-        self.done(1)
+        if event.key() == Qt.Key_Space:
+            self.saveImage()
+            self.done(1)
+        elif event.key() == Qt.Key_L:
+            self.drawMode = "line"
+        elif event.key() == Qt.Key_P:
+            self.drawMode = "point"
+        elif event.key() == Qt.Key_R:
+            self.drawMode = "rect"
 
 
 
