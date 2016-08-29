@@ -81,7 +81,8 @@ class Canvas(QDialog):
                     painter.drawLine(self.start.x(), self.start.y(), self.end.x(), self.end.y())
                 elif self.drawMode == "rect":
                     painter.drawRect(self.start.x(), self.start.y(), self.end.x() - self.start.x(), self.end.y() - self.start.y())
-
+                elif self.drawMode == "ellipse":
+                    painter.drawRect(self.start.x(), self.start.y(), self.end.x() - self.start.x(), self.end.y() - self.start.y())
         painter.drawPath(self.path)
         # for pt in self.preview:
         #     painter.drawPoint(pt)
@@ -107,6 +108,10 @@ class Canvas(QDialog):
                 self.path.addRect(self.start.x(), self.start.y(), 
                     self.end.x() - self.start.x(), 
                     self.end.y() - self.start.y())
+            elif self.drawMode == "ellipse":
+                self.path.addEllipse(self.start.x(), self.start.y(), 
+                    self.end.x() - self.start.x(), 
+                    self.end.y() - self.start.y())
             self.update()
 
     def mouseMoveEvent(self, event):
@@ -125,24 +130,8 @@ class Canvas(QDialog):
             self.drawMode = "point"
         elif event.key() == Qt.Key_R:
             self.drawMode = "rect"
-
-
-
-    # def mouseReleaseEvent(self, event):
-    #     print("Released")
-    #     if event.button() == Qt.LeftButton and self.drawing:
-    #         self.drawLine(self.prevPoint)
-    #         self.drawing = False
-
-    # def drawLine(self, currPoint):
-    #     painter = QPainter(self)
-    #     painter.begin(self)
-    #     painter.setPen(QPen(self.color, self.penWidth, Qt.SolidLine, Qt.RoundCap,
-    #         Qt.RoundJoin))
-    #     painter.drawLine(self.prevPoint, currPoint)
-    #     painter.end()
-    #     self.update()
-    #     self.prevPoint = QPoint(currPoint)
+        elif event.key() == Qt.Key_E:
+            self.drawMode = "ellipse"
 
 def initialize_canvas():
     paintTool = Canvas()
