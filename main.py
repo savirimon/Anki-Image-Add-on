@@ -26,6 +26,57 @@ from anki.consts import MODEL_STD
 global search_term
 search_term = "boop"
 
+
+def initialize_canvas():
+    paintTool = Canvas()
+    paintTool.exec_()
+    #update GUI here
+
+def review_entries():
+    review_images = imagesDialog()
+    if not review_images.exec_():
+        return
+        #raise RuntimeError('User cancel')
+
+def download_image_for_note():
+    try:
+        review_entries()
+    except RuntimeError as rte:
+        if 'cancel' in str(rte):
+            # User cancelled, so close silently
+            return
+        else:
+            #unhandled
+            raise
+
+def setupSearchBrowserButton(self):
+    open_button = self._addButton("imagesDialog", lambda self=self: review_entries(),
+                text=u"img\u0336", tip="ImageDialog (Ctrl+i)", key="Ctrl+i")
+
+def setupDrawingCanvasButton(self):
+    canvas_button = self._addButton("Canvas", lambda self=self: initialize_canvas(),
+            text=u"d\u0336", tip="Canvas (Ctrl+d)", key="Ctrl+d")
+
+def gainFocus(note, field):
+    global search_term
+    global currentNote
+    global mediaField
+    # Sets the search term to the field you're on
+    # Note: does not work with newly added fields until restart
+    search_term = note.fields[field]
+    currentNote = note
+    mediaField = field
+
+
+Editor.setupButtons = wrap(Editor.setupButtons, setupSearchBrowserButton)
+Editor.setupButtons = wrap(Editor.setupButtons, setupDrawingCanvasButton)
+addHook("editFocusGained", gainFocus)
+
+
+
+####### Custom Classes ######
+
+
 #Canvas class for drawing new study images
 class Canvas(QDialog):
 
@@ -137,30 +188,6 @@ class Canvas(QDialog):
         elif event.key() == Qt.Key_2:
             self.color = Qt.red;
 
-
-def initialize_canvas():
-    paintTool = Canvas()
-    paintTool.exec_()
-    #update GUI here
-
-def review_entries():
-    review_images = imagesDialog()
-    if not review_images.exec_():
-        return
-        #raise RuntimeError('User cancel')
-
-def download_image_for_note():
-    try:
-        review_entries()
-    except RuntimeError as rte:
-        if 'cancel' in str(rte):
-            # User cancelled, so close silently
-            return
-        else:
-            #unhandled
-            raise
-
-
 class Browser(QWebView):
 
     def __init__(self):
@@ -177,6 +204,7 @@ class imagesDialog(QDialog):
         self.initUI()
 
     def initUI(self):
+        global search_term
         search_term = str(search_term)
         # runHook("editFocusGained", self.note, field)
         self.setWindowTitle(_(u'Anki – Download images'))
@@ -196,6 +224,19 @@ class imagesDialog(QDialog):
         self.setLayout(outer_layout)
 
         outer_layout.addWidget(view)
+
+
+    # def mouseReleaseEvent(self, event):
+    #     self.drawing = False
+    #     self.update()
+
+    # def mouseMoveEvent(self, event):
+    #     if self.drawing:
+    #         self.points.append(event.pos())
+    #         self.update()
+
+    # def keyPressEvent(self, event):
+    #     self.saveImage()
 
     # def dragEnterEvent(self, event):
         # if(event.mimeData().hasImage()):
@@ -223,45 +264,3 @@ class imagesDialog(QDialog):
         #     list.addItem(item)
         # outer_layout.addWidget(list)
 
-    def setupSearchBrowserButton(self):
-        open_button = self._addButton("imagesDialog", lambda self=self: review_entries(),
-                    text=u"img\u0336", tip="ImageDialog (Ctrl+i)", key="Ctrl+i")
-
-    def setupDrawingCanvasButton(self):
-        canvas_button = self._addButton("Canvas", lambda self=self: initialize_canvas(),
-                text=u"d\u0336", tip="Canvas (Ctrl+d)", key="Ctrl+d")
-
-    def gainFocus(note, field):
-        global search_term
-        global currentNote
-        global mediaField
-        # Sets the search term to the field you're on
-        # Note: does not work with newly added fields until restart
-        search_term = note.fields[field]
-        currentNote = note
-        mediaField = field
-
-    # def mousePressEvent(self, event):
-    # print("Pressed")
-    # if event.button() == Qt.LeftButton and event.:
-
-
-    def mouseReleaseEvent(self, event):
-        self.drawing = False
-        self.update()
-
-    def mouseMoveEvent(self, event):
-        if self.drawing:
-            self.points.append(event.pos())
-            self.update()
-
-    def keyPressEvent(self, event):
-        self.saveImage()
-    
-
-
-
-
-    Editor.setupButtons = wrap(Editor.setupButtons, setupSearchBrowserButton)
-    Editor.setupButtons = wrap(Editor.setupButtons, setupDrawingCanvasButton)
-    addHook("editFocusGained", gainFocus)
