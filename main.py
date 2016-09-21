@@ -10,7 +10,6 @@ print(sys.path)
 sys.path.append(".")
 print(sys.path)
 
-
 # import the main window object (mw) from ankiqt
 from aqt import mw, browser, editor
 # import the "show info" tool from utils.py

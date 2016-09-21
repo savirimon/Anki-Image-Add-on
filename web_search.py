@@ -1,17 +1,21 @@
+# -*- coding: utf-8 -*-
+
+# import the main window object (mw) from ankiqt
+from aqt import mw, browser, editor
+# import the "show info" tool from utils.py
+from aqt.utils import showInfo
+from anki.utils import stripHTML
+# import all of the Qt GUI library
+from aqt.qt import *
+from aqt.editor import Editor
+#more imports
+from anki.hooks import addHook, runHook, wrap
+from anki.consts import MODEL_STD
+
 
 #global vars
 global search_term
-search_term = "boop"
-
-def gainFocus(note, field):
-    global search_term
-    global currentNote
-    global mediaField
-    # Sets the search term to the field you're on
-    # Note: does not work with newly added fields until restart
-    search_term = note.fields[field]
-    currentNote = note
-    mediaField = field
+# search_term = "boop"
 
 def review_entries():
     review_images = imagesDialog()
@@ -29,6 +33,16 @@ def download_image_for_note():
         else:
             #unhandled
             raise
+
+def gainFocus(note, field):
+    global search_term
+    global currentNote
+    global mediaField
+    # Sets the search term to the field you're on
+    # Note: does not work with newly added fields until restart
+    search_term = note.fields[field]
+    currentNote = note
+    mediaField = field
 
 class Browser(QWebView):
 
@@ -68,41 +82,32 @@ class imagesDialog(QDialog):
         outer_layout.addWidget(view)
 
 
-    # def mouseReleaseEvent(self, event):
-    #     self.drawing = False
-    #     self.update()
+""" Edits Anki's menu to include adding a note image
+"""
 
-    # def mouseMoveEvent(self, event):
-    #     if self.drawing:
-    #         self.points.append(event.pos())
-    #         self.update()
+# import the main window object (mw) from ankiqt
+from aqt import mw
+# import the "show info" tool from utils.py
+from aqt.utils import showInfo
+# import all of the Qt GUI library
+from aqt.qt import *
 
-    # def keyPressEvent(self, event):
-    #     self.saveImage()
+try:
+    mw.edit_media_submenu.addSeparator()
+except AttributeError:
+    mw.edit_media_submenu = QMenu(u"&Media", mw)
+    mw.form.menuEdit.addSeparator()
+    mw.form.menuEdit.addMenu(mw.edit_media_submenu)
 
-    # def dragEnterEvent(self, event):
-        # if(event.mimeData().hasImage()):
+# create a new menu item
+mw.images_search_action = QAction(mw)
+mw.images_search_action.setText(u"Note image")
+# mw.note_download_action.setToolTip(
+#     "Download images for all image fields on this note.")
 
+# set it to call testFunction when it's clicked
+mw.connect(mw.images_search_action, SIGNAL("triggered()"), download_image_for_note)
 
-        # query = "sunshine"
-        # search_results = bing_search(query, 'Image')
+mw.edit_media_submenu.addAction(mw.images_search_action)
 
-        # # Remplazar por QTreeWidget or QTableWidget
-        # list = QListWidget(self)
-        # #list.setDragDropMode(QAbstractItemView.NoDragDrop)
-        # list.setUniformItemSizes(True)
-        # list.setViewMode(1) # Set to icon view mode
-        # list.setIconSize(QSize(200,200))
-        # for result in search_results:
-        #     item = QListWidgetItem()
-
-        #     item.setText(result['Title'])
-        #     image_data = urllib2.urlopen(result['Thumbnail']['MediaUrl']).read()
-        #     qimage = QImage()
-        #     qimage.loadFromData(image_data)
-
-        #     item.setIcon(QIcon(QPixmap(qimage)))
-
-        #     list.addItem(item)
-        # outer_layout.addWidget(list)
-
+addHook("editFocusGained", gainFocus)

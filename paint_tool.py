@@ -1,8 +1,33 @@
+# -*- coding: utf-8 -*-
+
+# import the main window object (mw) from ankiqt
+from aqt import mw, browser, editor
+# import the "show info" tool from utils.py
+from aqt.utils import showInfo
+from anki.utils import stripHTML
+# import all of the Qt GUI library
+from aqt.qt import *
+from aqt.editor import Editor
+#more imports
+from anki.hooks import addHook, runHook, wrap
+from anki.consts import MODEL_STD
+
+
+
 def initialize_canvas():
     paintTool = Canvas()
     paintTool.exec_()
     #update GUI here
 
+def gainFocus(note, field):
+    global search_term
+    global currentNote
+    global mediaField
+    # Sets the search term to the field you're on
+    # Note: does not work with newly added fields until restart
+    search_term = note.fields[field]
+    currentNote = note
+    mediaField = field
 
 #Canvas class for drawing new study images
 class Canvas(QDialog):
@@ -27,22 +52,6 @@ class Canvas(QDialog):
         self.setGeometry(300, 300, 280, 170)
         self.setWindowTitle('Draw Reference Image')
         self.show()
-
-    #TODO: MAKE IT SO IT DISPLAYS CORRECT IMAGE WHEN THERE'S AN EXISTING IMAGE
-    def saveImage(self):
-        # save image to media folder 
-        pixels = QPixmap.grabWidget(self)
-        fileName = 'test1.jpg'
-        pixels.save(fileName, 'jpg')
-        # send to card in first empty field
-        data = data = u'<img src="%s">' % fileName
-
-        for(name, value) in currentNote.items():
-            if name == 'Back':
-                currentNote[name] = value + data
-        currentNote.flush()
-        mw.noteChanged(currentNote.id)
-        mw.reset()
 
     def paintEvent(self, event = None):
         print("Paint Event")
@@ -114,3 +123,24 @@ class Canvas(QDialog):
             self.color = Qt.black;
         elif event.key() == Qt.Key_2:
             self.color = Qt.red;
+
+
+    #TODO: MAKE IT SO IT DISPLAYS CORRECT IMAGE WHEN THERE'S AN EXISTING IMAGE
+    def saveImage(self):
+        # save image to media folder 
+        pixels = QPixmap.grabWidget(self)
+        fileName = 'test1.jpg'
+        pixels.save(fileName, 'jpg')
+        # send to card in first empty field
+        data = data = u'<img src="%s">' % fileName
+
+        global currentNote
+        
+        for(name, value) in currentNote.items():
+            if name == 'Back':
+                currentNote[name] = value + data
+        currentNote.flush()
+        mw.noteChanged(currentNote.id)
+        mw.reset()
+
+addHook("editFocusGained", gainFocus)
