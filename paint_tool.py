@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # import the main window object (mw) from ankiqt
-from aqt import mw, browser, editor
+from aqt import mw, browser
 # import the "show info" tool from utils.py
 from aqt.utils import showInfo
 from anki.utils import stripHTML
 # import all of the Qt GUI library
 from aqt.qt import *
-from aqt.editor import Editor
+
 #more imports
 from anki.hooks import addHook, runHook, wrap
 from anki.consts import MODEL_STD
@@ -47,6 +47,7 @@ class Canvas(QDialog):
         self.end = None
         self.drawMode = "point"
         self.path = QPainterPath()
+        self.setWindowFlags(Qt.WindowCloseButtonHint)
 
     def initUI(self):
         self.setGeometry(300, 300, 280, 170)
