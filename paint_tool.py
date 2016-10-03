@@ -47,10 +47,11 @@ class Canvas(QDialog):
         self.end = None
         self.drawMode = "point"
         self.path = QPainterPath()
+
         self.setWindowFlags(Qt.WindowCloseButtonHint)
 
     def initUI(self):
-        self.setGeometry(300, 300, 280, 170)
+        self.setGeometry(300, 100, 800, 800)
         self.setWindowTitle('Draw Reference Image')
         self.show()
 
@@ -88,17 +89,17 @@ class Canvas(QDialog):
     def mouseReleaseEvent(self, event):
         if self.drawMode == "point":
             self.path.addEllipse(event.pos().x(), event.pos().y(), 1, 1)
-        
+
         if self.start != None and self.end != None:
             if self.drawMode == "line":
                 self.path.lineTo(self.end.x(), self.end.y())
             elif self.drawMode == "rect":
-                self.path.addRect(self.start.x(), self.start.y(), 
-                    self.end.x() - self.start.x(), 
+                self.path.addRect(self.start.x(), self.start.y(),
+                    self.end.x() - self.start.x(),
                     self.end.y() - self.start.y())
             elif self.drawMode == "ellipse":
-                self.path.addEllipse(self.start.x(), self.start.y(), 
-                    self.end.x() - self.start.x(), 
+                self.path.addEllipse(self.start.x(), self.start.y(),
+                    self.end.x() - self.start.x(),
                     self.end.y() - self.start.y())
             self.update()
 
@@ -128,7 +129,7 @@ class Canvas(QDialog):
 
     #TODO: MAKE IT SO IT DISPLAYS CORRECT IMAGE WHEN THERE'S AN EXISTING IMAGE
     def saveImage(self):
-        # save image to media folder 
+        # save image to media folder
         pixels = QPixmap.grabWidget(self)
         fileName = 'test1.jpg'
         pixels.save(fileName, 'jpg')
@@ -136,7 +137,7 @@ class Canvas(QDialog):
         data = data = u'<img src="%s">' % fileName
 
         global currentNote
-        
+
         for(name, value) in currentNote.items():
             if name == 'Back':
                 currentNote[name] = value + data
