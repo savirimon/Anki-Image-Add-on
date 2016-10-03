@@ -2,14 +2,11 @@
 
 # IMAGE SEARCH
 
-TODO: Open interface from within the browse window
-TODO: Get the search term from the card (get_fields.py file from audio add-on)
 TODO: Add the normal closing buttons to the window
 TODO: Allow the app to close even the window is open
 
 
 TODO: Drawing interface
-
 
 # Drawing interface specs
 - Multiple colors
