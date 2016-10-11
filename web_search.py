@@ -58,6 +58,7 @@ class imagesDialog(QDialog):
     def __init__(self):
         super(imagesDialog, self).__init__()
         self.initUI()
+        self.setWindowFlags(Qt.WindowCloseButtonHint)
 
     def initUI(self):
         global search_term
